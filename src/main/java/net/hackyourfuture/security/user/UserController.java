@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/users")
@@ -25,7 +26,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public UserResponse profile() {
-        return userService.getProfile("REPLACE WITH CURRENTLY LOGGED IN USER ID");
+    public UserResponse profile(Authentication authentication) {
+        return userService.getProfile(authentication.getName());
     }
 }

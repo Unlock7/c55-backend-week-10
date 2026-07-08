@@ -4,24 +4,44 @@ import lombok.AllArgsConstructor;
 import net.hackyourfuture.security.user.dto.UserRequest;
 import net.hackyourfuture.security.user.dto.UserResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse register(UserRequest request) {
-        throw new UnsupportedOperationException("TODO: implement registration");
+        User existingUser = userRepository.findByUsername(request.username());
+
+        if (existingUser != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+        }
+
+        User user = new User(
+                UUID.randomUUID().toString(),
+                request.username(),
+                passwordEncoder.encode(request.password())
+        );
+
+        userRepository.createUser(user);
+
+        return new UserResponse(user.getId(), user.getUsername());
     }
 
     public UserResponse getProfile(String username) {
         User user = userRepository.findByUsername(username);
+
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
+
         return new UserResponse(user.getId(), user.getUsername());
     }
 }
